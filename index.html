@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- displays site properly based on user's device -->
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <link rel="stylesheet" href="css/style.css">
+  <title>Frontend Mentor | Tip calculator app</title>
+
+</head>
+
+<body>
+  <main>
+    <div class="container">
+      <div class="container__logo">
+        <img src="images/logo.svg" alt="logo">
+      </div>
+      <div class="container__calculator">
+        <div class="container__calculator_left">
+          <div class="bill__header">
+            <h1>Bill</h1>
+            <h1 id="bill_error">Can't be empty</h1>
+          </div>
+          <div class="container__inputs" id="bill_input">
+            <img src="images/icon-dollar.svg" alt="">
+            <input type="number" id="bill" onkeydown="return isNumberKey(this.value)" onfocusin="focus_in('bill')"
+              onfocusout="focus_out('bill')" value="0" autocomplete="off" />
+          </div>
+
+          <div class="container__select_tip">
+            <h1>Select Tip %</h1>
+            <div class="container__select_tip_inner">
+              <button onclick="setTip(5)">5%</button>
+              <button onclick="setTip(10)">10%</button>
+              <button onclick="setTip(15)">15%</button>
+              <button onclick="setTip(25)">25%</button>
+              <button onclick="setTip(50)">50%</button>
+              <input type="number" id="tip_custom" onfocusout="setTip('custom')" onkeydown="javascript: return event.keyCode === 8 ||
+        event.keyCode === 46 ? true : !isNaN(Number(event.key))" placeholder="Custom"></input>
+            </div>
+          </div>
+
+          <div class="container__people_number">
+            <div class="bill__header">
+              <h1>Number of People</h1>
+              <h1 id="people_error">Can't be empty</h1>
+            </div>
+            <div class="container__inputs" id="people_input">
+              <img src="images/icon-person.svg" alt="">
+              <input type="number" onfocusin="focus_in('people')" id="people" onfocusout="focus_out('people')"
+                onkeydown="return isNumberKey(this.value)" value="0" autocomplete="off" />
+            </div>
+          </div>
+        </div>
+
+        <div class="container__calculator_right">
+          <div class="container__calculator_right_inner">
+
+            <div class="container__calculator_content ">
+              <div class="container__calculator_content_left">
+                <h3>Tip Amount</h3>
+                <p>/ person</p>
+              </div>
+              <h2 id="tip_calculated">$0.00</h2>
+            </div>
+
+            <div class="container__calculator_content ">
+              <div class="container__calculator_content_left">
+                <h3>Total</h3>
+                <p>/ person</p>
+              </div>
+              <h2 id="bill_calculated">$0.00</h2>
+            </div>
+
+          </div>
+
+          <div class="container__calculator_reset">
+            <button id="reset_calculator">RESET</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+  <script type="text/javascript">
+    const reset_calculator = document.getElementById("reset_calculator");
+    let tip_calculated = document.getElementById("tip_calculated");
+    let bill_calculated = document.getElementById("bill_calculated");
+    let tip_type = "";
+
+    function focus_in(type) {
+      const input_type = document.getElementById(type + "_input");
+      input_type.classList.add('focused');
+
+    }
+
+    function focus_out(type) {
+      let number_input = document.getElementById(type);
+      const input_type = document.getElementById(type + "_input");
+      const bill_error = document.getElementById("bill_error");
+      const people_error = document.getElementById("people_error");
+      input_type.classList.remove('focused');
+
+      if (number_input.value == "" || number_input.value == "0") {
+        input_type.classList.add("focused_error");
+        if (type == "bill") {
+          bill_error.style.display = "block";
+        } else {
+          people_error.style.display = "block";
+        }
+        number_input.value = "0";
+      } else {
+        input_type.classList.remove("focused_error");
+
+        if (type == "bill") {
+          bill_error.style.display = "none";
+        } else {
+          people_error.style.display = "none";
+        }
+
+      }
+    }
+
+    function isNumberKey(evt) {
+      var charCode = (evt.which) ? evt.which : event.keyCode
+      if (charCode > 31 && (charCode < 48 || (charCode > 57 && charCode != 190 && charCode != 110))) {
+        return false;
+      }
+    }
+
+    function setTip(num) {
+      if (num == "custom") {
+        let tip_custom = document.getElementById("tip_custom").value;
+        if (tip_custom < 0) {
+          tip_custom.value = "0";
+        }
+        tip_type = tip_custom;
+      } else {
+        tip_type = num;
+        tip_custom.value = "";
+      }
+      calculateBillPeople(tip_type);
+    }
+
+    function calculateBillPeople(tip_type) {
+      const bill = document.getElementById('bill').value;
+      const people = document.getElementById('people').value;
+
+      if (bill === "0" || bill === "" && people === "0" || people === "") {
+        focus_out('bill');
+        focus_out('people');
+      }
+      displayCalculated(bill, people, tip_type);
+    }
+
+    function displayCalculated(bill, people, tip_type) {
+
+      if (people === "0") {
+
+      } else {
+        let new_tip_input = (tip_type / 100).toFixed(3);
+        let tip_amount = (bill * new_tip_input) / people;
+        let tip_final_amount = Math.round(tip_amount * 100) / 100;
+
+        let bill_amount = (bill / people) + tip_final_amount;
+        let bill_final_amount = Math.round(bill_amount * 100) / 100;
+
+
+
+        tip_calculated.innerHTML = "$" + tip_final_amount;
+        bill_calculated.innerHTML = "$" + bill_final_amount;
+      }
+    }
+
+    reset_calculator.addEventListener("click", function () {
+      let bill = document.getElementById('bill');
+      let people = document.getElementById('people');
+      let tip_custom = document.getElementById("tip_custom");
+
+      tip_calculated.innerHTML = "$0.00";
+      bill_calculated.innerHTML = "$0.00";
+      bill.value = "0";
+      people.value = "0";
+      tip_custom.value = "";
+    })
+
+
+  </script>
+</body>
+
+</html>
